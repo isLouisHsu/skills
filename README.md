@@ -14,6 +14,18 @@
 
 每个 skill 都是独立的，包含自己的文档和脚本。
 
+### 安装 Skills
+
+通过 `npx skills` 从 GitHub 安装 skill 到 Claude Code：
+
+```bash
+# 安装指定 skill
+npx skills add https://github.com/isLouisHsu/skills --skill project-docs-manager
+
+# 安装所有 skills
+npx skills add https://github.com/isLouisHsu/skills
+```
+
 ### 查看 Skill 文档
 
 ```bash
