@@ -88,7 +88,7 @@ python scripts/purify_video.py video.mp4
 python scripts/purify_video.py video.mp4 ./notes
 
 # 指定更多帧和更大的 Whisper 模型
-python scripts/purify_video.py video.mp4 --max-frames 12 --whisper-model large-v3
+python scripts/purify_video.py video.mp4 --max-frames 12 --whisper-model medium
 
 # 强制重新处理（不跳过已存在的文件）
 python scripts/purify_video.py video.mp4 ./notes --no-skip

@@ -6,8 +6,8 @@
 
 | Skill | 描述 | 位置 |
 |-------|------|------|
-| **bilibili-downloader** | 下载 B 站视频（单个或专辑/合集） | `skills/bilibili-downloader/` |
 | **project-docs-manager** | 以文档为中心的 AI 任务流程管理 | `skills/project-docs-manager/` |
+| **bilibili-downloader** | 下载 B 站视频（单个或专辑/合集） | `skills/bilibili-downloader/` |
 | **video-knowledge-purify** | 将视频内容转换为结构化 Markdown 笔记 | `skills/video-knowledge-purify/` |
 
 ## 快速开始
