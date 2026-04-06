@@ -147,7 +147,7 @@ class SrtTopicSegmenter:
                 {"role": "system", "content": _SYSTEM_PROMPT},
                 {"role": "user", "content": srt_text},
             ],
-            temperature=0.2,
+            # temperature=0.2,
         )
 
         raw = response.choices[0].message.content
