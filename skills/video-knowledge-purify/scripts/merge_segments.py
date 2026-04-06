@@ -78,7 +78,7 @@ _SYSTEM_PROMPT = """\
 
 ### note 字段要求（重点）
 提取并整理段落中的**核心知识点**，格式要求：
-- 使用 Markdown 格式（标题、列表、加粗等）
+- 使用 Markdown 格式（段落标题加粗，而不是用'#'、'##'、'###'、'####'）
 - 聚焦：概念定义、方法论、 actionable insights、对比结论、数据观点
 - **禁止**：描述画面场景、人物动作、视频形式、讲师外貌、"视频中提到"
 - **禁止**：复述"讲师说/提到/指出"，直接陈述知识点本身
@@ -286,6 +286,10 @@ class SrtMerger:
         )
 
         raw = response.choices[0].message.content
+
+        print(f"System Prompt: \n{_SYSTEM_PROMPT}")
+        print(f"Response: \n{raw}")
+
         return _parse_response(raw, fallback_note=_segments_to_text(segments))
 
     def _build_content(

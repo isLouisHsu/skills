@@ -55,6 +55,7 @@ _SYSTEM_PROMPT = """\
 2. 当视频中有明确的序号标记（如"第一/第二/第三"、"首先/其次/最后"、"步骤1/步骤2"等）时，应按这些标记切分
 3. 同一主题下的多个并列要点应分为不同段落
 4. 段落数量由内容自然决定，不要强行合并，也不要过度切割
+5. 过渡的句子不要单独成段落，可以和上一段或下一段合并
 
 严格返回 JSON，格式为字幕序号的闭区间列表，不要有任何多余文字：
 {"sections": [[1, 15], [16, 30], [31, 49]]}\
@@ -149,8 +150,11 @@ class SrtTopicSegmenter:
             ],
             # temperature=0.2,
         )
-
         raw = response.choices[0].message.content
+
+        print(f"System Prompt: \n{_SYSTEM_PROMPT}")
+        print(f"Response: \n{raw}")
+
         groups = self._parse_sections(raw, segments)
         print(f"[srt_segmenter] 分段完成：{len(groups)} 个大段落")
         return groups
