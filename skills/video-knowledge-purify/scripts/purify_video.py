@@ -104,6 +104,9 @@ def purify_video(
 
     segments_json_path = os.path.join(output_dir, f"{video_name}.json")
 
+    # 提取视频标题（使用文件名作为默认标题）
+    video_title = video_name
+
     if skip_existing and os.path.exists(segments_json_path):
         print(f"分段结果已存在，跳过 LLM 分段: {segments_json_path}")
         # 从 JSON 加载分组信息
@@ -120,7 +123,7 @@ def purify_video(
         print(f"已加载 {len(topic_groups)} 个段落")
     else:
         segmenter = SrtTopicSegmenter()
-        topic_groups = segmenter.segment(segments)
+        topic_groups = segmenter.segment(segments, video_title=video_title)
         save_segments_json(topic_groups, segments_json_path)
 
     # 步骤3: 汇总
@@ -129,7 +132,7 @@ def purify_video(
     print("=" * 60)
 
     merger = SrtMerger()
-    chunks = merger.merge(video_path, topic_groups, output_dir, max_frames)
+    chunks = merger.merge(video_path, topic_groups, output_dir, max_frames, video_title=video_title)
 
     # 生成笔记
     title = os.path.splitext(os.path.basename(video_path))[0]

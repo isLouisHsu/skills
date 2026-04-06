@@ -118,17 +118,29 @@ class SrtTopicSegmenter:
         )
         self.model = os.getenv("SRT_SEGMENTER_MODEL")
 
-    def segment(self, segments: List[SrtSegment]) -> List[List[SrtSegment]]:
-        """调用 LLM 按内容主题对 SRT 片段分组，返回分组后的段落列表。"""
+    def segment(self, segments: List[SrtSegment], video_title: str = "") -> List[List[SrtSegment]]:
+        """调用 LLM 按内容主题对 SRT 片段分组，返回分组后的段落列表。
+
+        :param segments: SRT 字幕片段列表
+        :param video_title: 视频标题（主题），用于帮助 LLM 理解整体语境
+        """
         if not segments:
             return []
 
-        srt_text = '\n'.join(
+        # 构建用户输入内容，包含视频标题
+        content_parts = []
+        if video_title:
+            content_parts.append(f"【视频主题】{video_title}\n")
+        content_parts.append("【字幕内容】")
+        content_parts.extend(
             f"[{s.index}] [{_fmt_time(s.start)}] {s.text.strip()}"
             for s in segments
         )
+        srt_text = '\n'.join(content_parts)
 
         print(f"[srt_segmenter] 发送 {len(segments)} 条字幕给 LLM 进行语义分段...")
+        if video_title:
+            print(f"[srt_segmenter] 视频主题: {video_title}")
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -229,7 +241,8 @@ def main():
 
     # 分段
     segmenter = SrtTopicSegmenter()
-    groups = segmenter.segment(segments)
+    video_title = os.path.splitext(os.path.basename(args.srt_path))[0]
+    groups = segmenter.segment(segments, video_title=video_title)
 
     # 保存结果
     save_segments_json(groups, output_json)

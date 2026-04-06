@@ -8,7 +8,7 @@
     python merge_segments.py <video_path> <segments_json> <output_dir> [options]
 
 示例:
-    python merge_segments.py video.mp4 segments.json ./notes --max-frames 8
+    python merge_segments.py video.mp4 segments.json ./notes --max-frames 4
 """
 
 import argparse
@@ -226,9 +226,17 @@ class SrtMerger:
         video_path: str,
         topic_groups: List[List[SrtSegment]],
         output_dir: str,
-        max_frames: int = 8,
+        max_frames: int = 4,
+        video_title: str = "",
     ) -> List[KnowledgeChunk]:
-        """完整流水线：逐语义段落提取帧、合并字幕、调用 VLM，返回 KnowledgeChunk 列表。"""
+        """完整流水线：逐语义段落提取帧、合并字幕、调用 VLM，返回 KnowledgeChunk 列表。
+
+        :param video_path: 视频文件路径
+        :param topic_groups: 按主题分组的字幕列表
+        :param output_dir: 输出目录
+        :param max_frames: 每段落最大采样帧数
+        :param video_title: 视频标题（主题），用于帮助 VLM 理解整体语境
+        """
         chunks: List[KnowledgeChunk] = []
         compressed_summary = ''
         frames_dir = os.path.join(output_dir, 'frames')
@@ -240,7 +248,7 @@ class SrtMerger:
             raw_frames = extract_frames(video_path, group, frames_dir)
             merged_segs, sampled_frames = _build_merged_pairs(group, raw_frames, max_frames)
 
-            note, compressed_summary = self.process_group(merged_segs, sampled_frames, compressed_summary)
+            note, compressed_summary = self.process_group(merged_segs, sampled_frames, compressed_summary, video_title)
 
             chunks.append(KnowledgeChunk(
                 note=note,
@@ -257,9 +265,16 @@ class SrtMerger:
         segments: List[SrtSegment],
         frame_paths: List[str],
         compressed_summary: str = '',
+        video_title: str = '',
     ) -> Tuple[str, str]:
-        """处理一个大段落（语义主题），返回 (note, updated_summary)"""
-        content = self._build_content(segments, frame_paths, compressed_summary)
+        """处理一个大段落（语义主题），返回 (note, updated_summary)
+
+        :param segments: 字幕片段列表
+        :param frame_paths: 帧图片路径列表
+        :param compressed_summary: 前文内容的压缩摘要
+        :param video_title: 视频标题（主题），用于帮助 VLM 理解整体语境
+        """
+        content = self._build_content(segments, frame_paths, compressed_summary, video_title)
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -267,7 +282,7 @@ class SrtMerger:
                 {"role": "system", "content": _SYSTEM_PROMPT},
                 {"role": "user", "content": content},
             ],
-            temperature=0.3,
+            # temperature=0.3,
         )
 
         raw = response.choices[0].message.content
@@ -278,8 +293,15 @@ class SrtMerger:
         segments: List[SrtSegment],
         frame_paths: List[str],
         compressed_summary: str,
+        video_title: str = '',
     ) -> list:
         parts = []
+
+        if video_title:
+            parts.append({
+                "type": "text",
+                "text": f"【视频主题】{video_title}\n",
+            })
 
         if compressed_summary:
             parts.append({
@@ -392,7 +414,7 @@ def main():
     parser.add_argument('video_path', help='视频文件路径')
     parser.add_argument('segments_json', help='分段JSON文件路径（或SRT文件路径）')
     parser.add_argument('output_dir', nargs='?', help='输出目录（默认：视频所在目录）')
-    parser.add_argument('--max-frames', '-f', type=int, default=8, help='每段落最大采样帧数 (默认: 8)')
+    parser.add_argument('--max-frames', '-f', type=int, default=4, help='每段落最大采样帧数 (默认: 4)')
     parser.add_argument('--srt-path', '-s', help='SRT文件路径（如果segments_json不是SRT则必须提供）')
     parser.add_argument('--skip-existing', '-k', action='store_true', help='如果笔记文件已存在则跳过')
 
@@ -439,7 +461,8 @@ def main():
 
     # 汇总
     merger = SrtMerger()
-    chunks = merger.merge(args.video_path, topic_groups, output_dir, args.max_frames)
+    video_title = os.path.splitext(os.path.basename(args.video_path))[0]
+    chunks = merger.merge(args.video_path, topic_groups, output_dir, args.max_frames, video_title=video_title)
 
     # 生成笔记
     title = os.path.splitext(os.path.basename(args.video_path))[0]
