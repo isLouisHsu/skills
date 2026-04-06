@@ -465,7 +465,7 @@ def main():
 
     # 汇总
     merger = SrtMerger()
-    video_title = os.path.splitext(os.path.basename(args.video_path))[0]
+    video_title = os.path.abspath(args.video_path)
     chunks = merger.merge(args.video_path, topic_groups, output_dir, args.max_frames, video_title=video_title)
 
     # 生成笔记

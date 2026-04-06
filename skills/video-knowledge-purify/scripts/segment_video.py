@@ -246,7 +246,7 @@ def main():
 
     # 分段
     segmenter = SrtTopicSegmenter()
-    video_title = os.path.splitext(os.path.basename(args.srt_path))[0]
+    video_title = os.path.abspath(args.srt_path)
     groups = segmenter.segment(segments, video_title=video_title)
 
     # 保存结果

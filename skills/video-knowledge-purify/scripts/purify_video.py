@@ -104,8 +104,8 @@ def purify_video(
 
     segments_json_path = os.path.join(output_dir, f"{video_name}.json")
 
-    # 提取视频标题（使用文件名作为默认标题）
-    video_title = video_name
+    # 提取视频标题（使用完整路径，让LLM能从目录结构获取主题信息）
+    video_title = os.path.abspath(video_path)
 
     if skip_existing and os.path.exists(segments_json_path):
         print(f"分段结果已存在，跳过 LLM 分段: {segments_json_path}")
