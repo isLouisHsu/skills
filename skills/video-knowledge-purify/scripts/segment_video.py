@@ -191,7 +191,8 @@ def save_segments_json(groups: List[List[SrtSegment]], output_path: str) -> None
             "start_time": group[0].start,
             "end_time": group[-1].end,
             "text_count": len(group),
-            "preview": group[0].text[:100] + "..." if len(group[0].text) > 100 else group[0].text,
+            # "preview": group[0].text[:100] + "..." if len(group[0].text) > 100 else group[0].text,
+            "preview": group[0].text,
         })
 
     os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
