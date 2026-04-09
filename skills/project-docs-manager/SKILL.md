@@ -87,11 +87,26 @@ CLAUDE.md（AI 每次 session 自动加载）
 
 | 用户意图 | 流程 | 说明 |
 |----------|------|------|
-| 首次创建文档库 | → [INITIALIZE.md](./references/INITIALIZE.md) | 检测 → 创建骨架 → 注册到 CLAUDE.md |
+| 首次创建文档库 | → [INITIALIZE.md](./references/INITIALIZE.md) | 检测 → 从模板创建骨架 → 注册到 CLAUDE.md |
 | 记录新的迭代/变更 | → [UPDATE.md](./references/UPDATE.md) | 收集输入 → 分析 → 实施 → 记录 → 更新索引 |
 | 查看项目状态 | 直接读取 `{docs_path}/_INDEX.md` → `{media_path}/OVERVIEW.md` | 无需额外流程 |
 | 查找历史决策 | 读取 `{media_path}/CHANGELOG.md` → 打开对应 `{media_path}/changes/*.md` | 按需深入 |
 | 查阅知识 | 读取 `{media_path}/KNOWLEDGE.md` → 打开对应 `{media_path}/knowledge/*.md` | 按需深入 |
+
+## Document Templates
+
+文档库创建时使用 `references/templates/` 目录下的标准模板：
+
+| 模板文件 | 用途 |
+|----------|------|
+| [`templates/_INDEX.md`](./references/templates/_INDEX.md) | 仓库索引模板 |
+| [`templates/OVERVIEW.md`](./references/templates/OVERVIEW.md) | 项目概览模板 |
+| [`templates/CHANGELOG.md`](./references/templates/CHANGELOG.md) | 变更历史索引模板 |
+| [`templates/KNOWLEDGE.md`](./references/templates/KNOWLEDGE.md) | 知识库索引模板 |
+| [`templates/change_detail.md`](./references/templates/change_detail.md) | 单次变更详情模板 |
+| [`templates/knowledge_detail.md`](./references/templates/knowledge_detail.md) | 知识主题详情模板 |
+
+**注意**：初始化文档库时，AI 应复制上述模板文件到用户的 `{media_path}/` 目录，而不是让用户直接修改 skill 目录下的模板本身。
 
 ## Supported Document Media
 

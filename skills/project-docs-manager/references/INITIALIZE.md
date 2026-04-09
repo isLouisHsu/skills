@@ -19,7 +19,14 @@
 如果不存在 → 继续 Step 2
 ```
 
-### Step 2: 判断项目类型
+### Step 2: 收集基础信息
+
+无论全新项目还是已有项目，首先收集以下通用信息：
+
+1. **文档媒介偏好**：本地目录（默认） / Obsidian / 云文档
+2. **文档库路径**：默认为 `{项目根目录}/project-docs/`
+
+### Step 3: 判断项目类型并收集项目信息
 
 通过以下信号判断当前是全新项目还是已有项目：
 
@@ -41,8 +48,6 @@
 
 1. **项目名称**：用于 `{media_path}/OVERVIEW.md` 标题
 2. **项目简介**：一句话描述项目目标
-3. **文档媒介偏好**：本地目录（默认） / Obsidian / 云文档
-4. **文档库路径**：默认为 `{项目根目录}/project-docs/`
 
 → 然后跳到 Step 4 创建骨架（模板中的内容留空待用户填写）
 
@@ -50,14 +55,12 @@
 
 已有项目的初始化不应该留一堆"待补充"的空模板，而是 **AI 主动从项目中提取知识，预填充文档**。
 
-#### 3B.1 向用户确认基本信息
+#### 3B.1 向用户确认项目信息
 
 先快速确认（部分可从 README / package.json 等自动推断）：
 
 1. **项目名称**：从 README 标题、package.json name、目录名推断，让用户确认
 2. **项目简介**：从 README 首段推断，让用户确认或补充
-3. **文档媒介偏好**：本地目录（默认） / Obsidian / 云文档
-4. **文档库路径**：默认为 `{项目根目录}/project-docs/`
 
 #### 3B.2 自动探测项目现状
 
@@ -164,14 +167,16 @@
     └── .gitkeep
 ```
 
-各文件模板 → 详见 [templates/](./templates/) 目录：
+各文件模板位于 `skills/project-docs-manager/references/templates/` 目录：
 
-| 文件 | 模板 |
-|------|------|
-| `_INDEX.md` | [templates/_INDEX.md](./templates/_INDEX.md) |
-| `OVERVIEW.md` | [templates/OVERVIEW.md](./templates/OVERVIEW.md) |
-| `CHANGELOG.md` | [templates/CHANGELOG.md](./templates/CHANGELOG.md) |
-| `KNOWLEDGE.md` | [templates/KNOWLEDGE.md](./templates/KNOWLEDGE.md) |
+| 文件 | 模板路径 |
+|------|----------|
+| `_INDEX.md` | `references/templates/_INDEX.md` |
+| `OVERVIEW.md` | `references/templates/OVERVIEW.md` |
+| `CHANGELOG.md` | `references/templates/CHANGELOG.md` |
+| `KNOWLEDGE.md` | `references/templates/KNOWLEDGE.md` |
+
+**重要**：创建文档库时，AI 应从上述模板目录复制对应文件到目标位置，而非修改 skill 自身的内容。
 
 使用模板时，将以下占位符替换为实际值：
 
