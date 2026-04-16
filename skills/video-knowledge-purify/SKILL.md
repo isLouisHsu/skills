@@ -26,7 +26,7 @@ pip install torch
 
 ```bash
 cp scripts/.env.example scripts/.env
-# 编辑 .env 填入你的配置
+# 编辑 scripts/.env 填入你的配置
 ```
 
 ### 配置示例（阿里云百炼）
