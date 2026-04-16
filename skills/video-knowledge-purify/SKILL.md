@@ -12,12 +12,7 @@ description: 将视频内容整理为结构化的 Markdown 知识笔记。当用
 使用前确保安装依赖：
 
 ```bash
-pip install faster-whisper av openai python-dotenv
-```
-
-可选（用于 GPU 加速）：
-```bash
-pip install torch
+pip install faster-whisper av openai python-dotenv torch
 ```
 
 ## 环境变量配置
