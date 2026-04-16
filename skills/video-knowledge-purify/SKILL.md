@@ -22,10 +22,10 @@ pip install torch
 
 ## 环境变量配置
 
-需要配置模型 API 密钥（支持 OpenAI 格式）。**推荐使用 `.env` 文件**：
+需要配置模型 API 密钥（支持 OpenAI 格式）。**推荐使用 `scripts/.env` 文件**：
 
 ```bash
-cp .env.example .env
+cp scripts/.env.example scripts/.env
 # 编辑 .env 填入你的配置
 ```
 
