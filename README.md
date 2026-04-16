@@ -1,6 +1,6 @@
-# Claude Code Skills
+# Skills writen by Louis
 
-个人 Claude Code 技能库，包含媒体处理和项目管理的实用工具。
+个人 Agent 技能库，包含媒体处理和项目管理的实用工具。
 
 ## Skills 列表
 
@@ -16,7 +16,7 @@
 
 ### 安装 Skills
 
-通过 `npx skills` 从 GitHub 安装 skill 到 Claude Code：
+通过 `npx skills` 从 GitHub 安装 skill 到 Agent：
 
 ```bash
 # 安装指定 skill
