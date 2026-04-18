@@ -13,7 +13,7 @@
 ```
 检查项目根目录下是否存在以下任一标志：
 - {docs_path}/_INDEX.md
-- CLAUDE.md 中包含 "project-docs" 引用
+- 入口文件（`CLAUDE.md` / `AGENTS.md` / `MEMORY.md`）中包含 "project-docs" 引用
 
 如果已存在 → 提示用户"文档库已初始化"，询问是否需要修复/补全
 如果不存在 → 继续 Step 2
@@ -25,6 +25,12 @@
 
 1. **文档媒介偏好**：本地目录（默认） / Obsidian / 云文档
 2. **文档库路径**：默认为 `{项目根目录}/project-docs/`
+3. **使用的 AI 工具**：Claude Code（默认） / 其他 Code Agent（Copilot、Cursor、Windsurf 等） / OpenClaw
+
+> **AI 工具选择决定注册目标**：
+> - Claude Code → 注册到项目根目录 `CLAUDE.md`
+> - 其他 Code Agent → 注册到项目根目录 `AGENTS.md`
+> - OpenClaw → 注册到项目根目录 `MEMORY.md`
 
 ### Step 3: 判断项目类型并收集项目信息
 
@@ -210,9 +216,13 @@
 - `{media_path}/changes/` 和 `{media_path}/knowledge/` 目录不在本地创建，在 `{docs_path}/_INDEX.md` 中以云端链接形式维护
 - `{docs_path}/_INDEX.md` 顶部追加说明：`> 本文档库采用"本地索引 + 云端详情"模式，详情文档请在云端平台查看。`
 
-### Step 5: 注册到 CLAUDE.md
+### Step 5: 注册到对应 Agent 的入口文件
 
-在项目根目录的 `CLAUDE.md` 中添加以下内容（如果 CLAUDE.md 不存在则创建）：
+根据 Step 2 中用户选择的 AI 工具，在项目根目录创建对应的入口文件。
+
+#### Claude Code → `CLAUDE.md`
+
+在项目根目录创建或追加到 `CLAUDE.md`：
 
 ```markdown
 ## 项目文档库
@@ -229,11 +239,139 @@
 5. 文档中的交叉引用链接必须保持有效
 ```
 
+#### 其他 Code Agent → `AGENTS.md`
+
+在项目根目录创建 `AGENTS.md`：
+
+```markdown
+# {项目名称} — AI 助手协作指南
+
+> 本指南适用于所有 AI 编程助手（GitHub Copilot、Cursor、Windsurf 等）。
+> 开始处理本项目前，请先阅读此指南。
+
+## 项目文档库
+
+本项目使用结构化文档库管理项目知识，文档库是 AI 和人类共同的单一事实源。
+
+### 文档结构
+
+```
+{docs_path}/                    # 仓库内入口
+└── _INDEX.md                   # 文档库目录索引（AI 优先扫描）
+
+{media_path}/                   # 实际文档
+├── OVERVIEW.md                 # 项目全局概览 + 当前进展
+├── CHANGELOG.md                # 变更历史索引（时间倒排）
+├── KNOWLEDGE.md                # 知识库索引
+├── changes/                    # 变更详情
+│   └── YYYY-MM-DD_xxx.md
+└── knowledge/                  # 知识详情
+    └── topic_xxx.md
+```
+
+### 开始工作前的读取顺序
+
+处理任何任务前，请按以下顺序读取文档：
+
+1. **{docs_path}/_INDEX.md** — 了解文档库全貌，获取文件清单
+2. **{media_path}/OVERVIEW.md** — 了解项目当前状态、待办事项、核心指标
+3. **{media_path}/CHANGELOG.md** — 了解最近的变更历史（重点看最近 5 条）
+4. **按需深入** — 如需了解某次变更细节，打开对应的 `changes/*.md`；如需了解某个技术主题，打开对应的 `knowledge/*.md`
+
+## 文档维护协议
+
+### 每次迭代完成后必须执行
+
+1. **更新 `{media_path}/CHANGELOG.md`**
+   - 在表格最上方追加新的变更记录
+   - 格式：`| 日期 | 标题 | 一句话结果 | 详情链接 |`
+
+2. **更新 `{media_path}/OVERVIEW.md`**
+   - 更新"当前进展 > 状态"
+   - 追加"最近里程碑"
+   - 更新"待办事项"
+   - 如有指标变化，更新"核心指标"
+
+3. **更新 `{docs_path}/_INDEX.md`**
+   - 如有新增文件，追加到对应 section
+   - 更新相关条目的"最后更新"日期
+
+### 交叉引用规范
+
+- 在关键位置标注跳转链接：`→ 详见 [文件名](相对路径)`
+- 索引文件（`_INDEX.md`、`CHANGELOG.md`、`KNOWLEDGE.md`）只放摘要和链接，不放详情
+- 索引条目控制在一行以内（< 150 字符）
+```
+
+#### OpenClaw → `MEMORY.md`
+
+在项目根目录创建 `MEMORY.md`：
+
+```markdown
+# {项目名称} — 上下文记忆
+
+> 本文件由 OpenClaw 读取，用于维护项目上下文记忆。
+> 格式要求：机器可读优先，每个 section 使用固定字段。
+
+## 项目信息
+
+- **name**: {项目名称}
+- **description**: {项目简介}
+- **created_at**: {YYYY-MM-DD}
+- **docs_path**: {docs_path}
+- **media_path**: {media_path}
+
+## 当前状态
+
+- **status**: 初始化完成
+- **current_focus**: 待定义
+- **last_updated**: {YYYY-MM-DD}
+
+## 待办事项
+
+- [ ] 补充项目详细背景
+- [ ] 记录第一次迭代
+
+## 最近变更
+
+| date | title | result |
+|------|-------|--------|
+| {YYYY-MM-DD} | 文档库初始化 | 创建标准文档库骨架 |
+
+## 技术栈
+
+- **language**: 待补充
+- **framework**: 待补充
+- **key_dependencies**: 待补充
+
+## 关键决策
+
+（待补充，记录重要的技术选型和架构决策）
+
+## 文档库索引
+
+| file | path | purpose |
+|------|------|---------|
+| _INDEX.md | {docs_path}/_INDEX.md | 文档库入口索引 |
+| OVERVIEW.md | {media_path}/OVERVIEW.md | 项目全局概览 |
+| CHANGELOG.md | {media_path}/CHANGELOG.md | 变更历史索引 |
+| KNOWLEDGE.md | {media_path}/KNOWLEDGE.md | 知识库索引 |
+
+## 更新协议
+
+每次迭代后必须更新本文件的以下字段：
+- `current_status` — 反映最新项目状态
+- `last_updated` — 更新日期
+- `recent_changes` — 追加最新变更
+- `todo_items` — 同步待办状态
+```
+
 ### Step 6: 输出初始化报告
 
 向用户展示：
 - 创建的文件列表
 - 文档库路径
+- 注册的 Agent 入口文件（`CLAUDE.md` / `AGENTS.md` / `MEMORY.md`）
 - 下一步建议（补充 `{media_path}/OVERVIEW.md`、记录第一次迭代）
 
 ## Error Handling
@@ -242,7 +380,8 @@
 |------|------|
 | 文档库已存在 | 提示用户，询问是否补全缺失文件 |
 | 无写入权限 | 提示用户检查目录权限 |
-| CLAUDE.md 已有文档库配置 | 跳过 Step 4，避免重复 |
+| 入口文件已有文档库配置 | 跳过 Step 5，避免重复 |
+| 用户切换 AI 工具 | 询问是否迁移或重建入口文件 |
 | 用户选择云文档媒介 | 创建本地索引骨架，详情链接留空待用户填写云端 URL |
 | git 仓库无提交历史 | 视为全新项目，走 Step 3A |
 | git 历史过多（>1000 commits） | 只分析最近 3 个月 + tag 发布记录，避免耗时过长 |

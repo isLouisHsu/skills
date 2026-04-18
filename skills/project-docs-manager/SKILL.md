@@ -49,18 +49,27 @@ user-invokable: true
 | `{media_path}/changes/*.md` | 单次变更详情：背景、方案、实施、结果、TODO | 低 — 仅需深入时打开 |
 | `{media_path}/knowledge/*.md` | 单个知识主题详情：定义、上下文、相关链接 | 低 — 仅需深入时打开 |
 
-### AI 自动读取依赖链
+### 多 Agent 支持
 
-`{docs_path}/_INDEX.md` 的"每次 session 首先读取"依赖于在项目 `CLAUDE.md` 中注册文档库路径。完整链路：
+本技能支持多种 AI 工具，不同 Agent 使用不同的入口文件：
 
+| Agent 类型 | 入口文件 | 加载机制 |
+|-----------|---------|---------|
+| **Claude Code** | 项目根目录 `CLAUDE.md` | 每次 session 自动加载 |
+| **其他 Code Agent**（Copilot、Cursor、Windsurf 等） | 项目根目录 `AGENTS.md` | 需 Agent 手动读取 |
+| **OpenClaw** | 项目根目录 `MEMORY.md` | 作为上下文记忆读取 |
+
+**AI 自动读取依赖链**：
 ```
-CLAUDE.md（AI 每次 session 自动加载）
+入口文件（CLAUDE.md/AGENTS.md/MEMORY.md）（AI 每次 session 自动加载）
   → 包含文档库路径和操作规范
     → 指示 AI 首先读取 {docs_path}/_INDEX.md
       → {docs_path}/_INDEX.md 引导 AI 按需读取 {media_path}/ 下的文档
 ```
 
-初始化流程的 Step 5 会自动完成此注册。如果 `CLAUDE.md` 中缺少文档库配置，AI 将无法自动感知文档库的存在。
+对于非 Claude Code 的 Agent，`AGENTS.md` 中需明确指示"开始工作前请手动读取 `{docs_path}/_INDEX.md`"。`MEMORY.md` 则使用结构化字段保存项目关键信息，便于 OpenClaw 快速恢复上下文。
+
+初始化流程的 Step 5 会根据用户使用的 Agent 类型，自动注册到对应的入口文件。如果入口文件缺少文档库配置，AI 将无法自动感知文档库的存在。
 
 ## Document Maintenance Rules
 
@@ -87,7 +96,7 @@ CLAUDE.md（AI 每次 session 自动加载）
 
 | 用户意图 | 流程 | 说明 |
 |----------|------|------|
-| 首次创建文档库 | → [INITIALIZE.md](./references/INITIALIZE.md) | 检测 → 从模板创建骨架 → 注册到 CLAUDE.md |
+| 首次创建文档库 | → [INITIALIZE.md](./references/INITIALIZE.md) | 检测 → 从模板创建骨架 → 注册到对应 Agent 的入口文件 |
 | 记录新的迭代/变更 | → [UPDATE.md](./references/UPDATE.md) | 收集输入 → 分析 → 实施 → 记录 → 更新索引 |
 | 查看项目状态 | 直接读取 `{docs_path}/_INDEX.md` → `{media_path}/OVERVIEW.md` | 无需额外流程 |
 | 查找历史决策 | 读取 `{media_path}/CHANGELOG.md` → 打开对应 `{media_path}/changes/*.md` | 按需深入 |
