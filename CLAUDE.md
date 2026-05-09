@@ -12,6 +12,7 @@ Each skill is a self-contained directory under `skills/` with its own documentat
 
 | Skill | Purpose | Location |
 |-------|---------|----------|
+| `project-interview` | Interactive project interview for generating structured documentation | `skills/project-interview/` |
 | `project-docs-manager` | Document-centric AI task flow management | `skills/project-docs-manager/` |
 | `bilibili-downloader` | Download Bilibili videos (single or album) | `skills/bilibili-downloader/` |
 | `video-knowledge-purify` | Convert videos to structured Markdown notes | `skills/video-knowledge-purify/` |
