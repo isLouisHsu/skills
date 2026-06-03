@@ -32,10 +32,13 @@ user-invokable: true
 ├── OVERVIEW.md                 # 全局概览 + 当前进展
 ├── CHANGELOG.md                # 变更历史索引（时间倒排，一句话摘要）
 ├── KNOWLEDGE.md                # 知识库索引（一句话摘要）
+├── INVESTIGATION.md            # 调研索引（探索性调研、数据分析、可行性验证）
 ├── changes/                    # 变更详情
 │   └── YYYY-MM-DD_xxx.md
-└── knowledge/                  # 知识详情
-    └── topic_xxx.md
+├── knowledge/                  # 知识详情
+│   └── topic_xxx.md
+└── investigations/             # 调研详情
+    └── YYYY-MM-DD_xxx.md
 ```
 
 ### File Responsibilities
@@ -46,30 +49,23 @@ user-invokable: true
 | `{media_path}/OVERVIEW.md` | 项目背景、目标、当前状态、核心指标、团队分工 | 高 — 理解项目全貌 |
 | `{media_path}/CHANGELOG.md` | 变更历史索引，每条记录：日期、标题、一句话结果、详情链接 | 高 — 了解迭代历史 |
 | `{media_path}/KNOWLEDGE.md` | 知识条目索引，每条：主题、一句话说明、详情链接 | 中 — 按需查阅 |
+| `{media_path}/INVESTIGATION.md` | 调研条目索引，每条：主题、一句话说明、详情链接、日期 | 中 — 按需查阅 |
 | `{media_path}/changes/*.md` | 单次变更详情：背景、方案、实施、结果、TODO | 低 — 仅需深入时打开 |
 | `{media_path}/knowledge/*.md` | 单个知识主题详情：定义、上下文、相关链接 | 低 — 仅需深入时打开 |
+| `{media_path}/investigations/*.md` | 单次调研详情：问题定义、数据源、调研方案、结论 | 低 — 仅需深入时打开 |
 
-### 多 Agent 支持
+### AI 自动读取依赖链
 
-本技能支持多种 AI 工具，不同 Agent 使用不同的入口文件：
+`{docs_path}/_INDEX.md` 的"每次 session 首先读取"依赖于在项目 `CLAUDE.md` 中注册文档库路径。完整链路：
 
-| Agent 类型 | 入口文件 | 加载机制 |
-|-----------|---------|---------|
-| **Claude Code** | 项目根目录 `CLAUDE.md` | 每次 session 自动加载 |
-| **其他 Code Agent**（Copilot、Cursor、Windsurf 等） | 项目根目录 `AGENTS.md` | 需 Agent 手动读取 |
-| **OpenClaw** | 项目根目录 `MEMORY.md` | 作为上下文记忆读取 |
-
-**AI 自动读取依赖链**：
 ```
-入口文件（CLAUDE.md/AGENTS.md/MEMORY.md）（AI 每次 session 自动加载）
+CLAUDE.md（AI 每次 session 自动加载）
   → 包含文档库路径和操作规范
     → 指示 AI 首先读取 {docs_path}/_INDEX.md
       → {docs_path}/_INDEX.md 引导 AI 按需读取 {media_path}/ 下的文档
 ```
 
-对于非 Claude Code 的 Agent，`AGENTS.md` 中需明确指示"开始工作前请手动读取 `{docs_path}/_INDEX.md`"。`MEMORY.md` 则使用结构化字段保存项目关键信息，便于 OpenClaw 快速恢复上下文。
-
-初始化流程的 Step 5 会根据用户使用的 Agent 类型，自动注册到对应的入口文件。如果入口文件缺少文档库配置，AI 将无法自动感知文档库的存在。
+初始化流程的 Step 5 会自动完成此注册。如果 `CLAUDE.md` 中缺少文档库配置，AI 将无法自动感知文档库的存在。
 
 ## Document Maintenance Rules
 
@@ -79,14 +75,15 @@ user-invokable: true
 - `{docs_path}/_INDEX.md` 中每个条目都必须有可点击的链接
 
 ### Index Discipline（索引纪律）
-- `{docs_path}/_INDEX.md`、`{media_path}/CHANGELOG.md`、`{media_path}/KNOWLEDGE.md` 是索引文件，只放摘要和链接，不放详情
+- `{docs_path}/_INDEX.md` 只维护顶层索引文件（OVERVIEW / CHANGELOG / KNOWLEDGE / INVESTIGATION）的链接，不直接列出子文档
+- `{media_path}/CHANGELOG.md`、`{media_path}/KNOWLEDGE.md`、`{media_path}/INVESTIGATION.md` 是二级索引文件，只放摘要和链接，不放详情
 - 索引条目控制在一行以内（< 150 字符）
-- 详情一律放在 `{media_path}/changes/` 或 `{media_path}/knowledge/` 子目录
+- 详情一律放在 `{media_path}/changes/`、`{media_path}/knowledge/` 或 `{media_path}/investigations/` 子目录
 
 ### Update Protocol（更新协议）
 每次文档变更必须：
-1. 更新 `{docs_path}/_INDEX.md`（如有新文件）
-2. 更新 `{media_path}/CHANGELOG.md`（追加变更记录）
+1. `{docs_path}/_INDEX.md` 只维护顶层索引文件链接（OVERVIEW / CHANGELOG / KNOWLEDGE / INVESTIGATION），仅在新增顶层索引文件时更新
+2. 新增子文档时，更新对应的索引文件（`CHANGELOG.md` / `KNOWLEDGE.md` / `INVESTIGATION.md`），不要加到 `_INDEX.md`
 3. 更新 `{media_path}/OVERVIEW.md` 中的"当前进展"（如状态变化）
 4. 检查并更新相关文档中的交叉引用链接
 
@@ -96,11 +93,12 @@ user-invokable: true
 
 | 用户意图 | 流程 | 说明 |
 |----------|------|------|
-| 首次创建文档库 | → [INITIALIZE.md](./references/INITIALIZE.md) | 检测 → 从模板创建骨架 → 注册到对应 Agent 的入口文件 |
+| 首次创建文档库 | → [INITIALIZE.md](./references/INITIALIZE.md) | 检测 → 从模板创建骨架 → 注册到 CLAUDE.md |
 | 记录新的迭代/变更 | → [UPDATE.md](./references/UPDATE.md) | 收集输入 → 分析 → 实施 → 记录 → 更新索引 |
 | 查看项目状态 | 直接读取 `{docs_path}/_INDEX.md` → `{media_path}/OVERVIEW.md` | 无需额外流程 |
 | 查找历史决策 | 读取 `{media_path}/CHANGELOG.md` → 打开对应 `{media_path}/changes/*.md` | 按需深入 |
 | 查阅知识 | 读取 `{media_path}/KNOWLEDGE.md` → 打开对应 `{media_path}/knowledge/*.md` | 按需深入 |
+| 记录/查阅调研方案 | 读取 `{media_path}/INVESTIGATION.md` → 打开对应 `{media_path}/investigations/*.md` | 按需深入 |
 
 ## Document Templates
 
@@ -119,7 +117,7 @@ user-invokable: true
 
 ## Supported Document Media
 
-项目仅维护 `{docs_path}/_INDEX.md` 作为入口索引，其余文档（`{media_path}/OVERVIEW.md`、`{media_path}/CHANGELOG.md`、`{media_path}/KNOWLEDGE.md`、`{media_path}/changes/`、`{media_path}/knowledge/`）均创建在用户选择的文档媒介中。
+项目仅维护 `{docs_path}/_INDEX.md` 作为入口索引，其余文档（`{media_path}/OVERVIEW.md`、`{media_path}/CHANGELOG.md`、`{media_path}/KNOWLEDGE.md`、`{media_path}/INVESTIGATION.md`、`{media_path}/changes/`、`{media_path}/knowledge/`、`{media_path}/investigations/`）均创建在用户选择的文档媒介中。
 
 支持的媒介：
 - **本地目录**（默认）：文档创建在用户指定的本地路径，`{docs_path}/_INDEX.md` 中以相对/绝对路径链接
