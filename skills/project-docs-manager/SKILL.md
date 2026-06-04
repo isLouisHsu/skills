@@ -1,15 +1,24 @@
 ---
 name: project-docs-manager
-description: 以文档为中心的 AI 任务流程管理技能，维护结构化项目文档库，形成完整迭代闭环。当用户消息中包含"项目文档"、"文档库"、"文档管理"、"project docs"、"doc hub"、"docs manager"、"初始化文档"、"更新文档"、"文档迭代"等关键词时触发
+description: 文档驱动的 AI 自主迭代引擎。维护结构化项目文档库作为 AI 的操作系统，让 AI 自主理解现状、提出方案、执行变更、回收效果、沉淀知识，形成完整迭代闭环。用户用自然语言对话即可驱动全流程，无需记忆具体命令。当用户消息涉及项目迭代推进、了解现状、追溯决策、沉淀知识、更新文档等意图时触发
 user-invokable: true
 ---
 
 # project-docs-manager
 
-以文档为中心的 AI 任务流程管理技能。维护结构化项目文档库，让 AI 自主理解项目全貌、历史决策和当前状态，形成"背景 → 分析 → 方案 → 实施 → 效果"的完整闭环。核心原则是：
+以文档为中心的 AI 任务流程管理技能。维护结构化项目文档库，让 AI 自主理解项目全貌、历史决策和当前状态，形成"背景 → 分析 → 方案 → 实施 → 效果"的完整闭环。
+
+## Design Philosophy
+
+**文档是 AI 的操作系统，不是人的操作对象。** 这不只是一个文档管理工具——它要实现的是让 AI 能够自主地理解项目现状、提出优化方向、执行变更、回收效果、沉淀知识，然后基于新的认知发起下一轮迭代，全程不依赖人类重新交代背景。人类只在关键决策点把关，其余由 AI 自主驱动。
+
+**用户用自然语言对话，无需记命令。** 除首次初始化外，所有操作都通过自然语言触发。用户说意图，AI 自己去读对应的文档、做分析、执行、写回结果。
+
+核心原则：
 1. 单一事实源（Single Source of Truth）：所有项目知识沉淀在项目文档库中，不散落在聊天记录里。文档库是 AI 和人类共同的唯一参考。
 2. 机器可读优先（Machine-Readable First）：文档使用固定的 section、字段和格式，而非随意叙事。AI 能快速解析、定位和更新。
 3. 闭环自更新（Self-Updating Loop）：每次迭代结束后，AI 必须更新文档，确保下一次 session 看到的是最新状态。绝不留"口头约定"。
+4. 一轮一文件（One Iteration, One Change File）：一项迭代的全部内容（业务背景、方案分析、审批决策、实施过程、效果数据、经验总结）维护在同一份 `changes/*.md` 文件中，完整记录从发起到归档的全过程。
 
 ## Key Paths
 
@@ -89,16 +98,32 @@ CLAUDE.md（AI 每次 session 自动加载）
 
 ## Workflow Dispatch
 
-根据用户意图分发到对应流程：
+根据用户自然语言意图分发到对应流程。除初始化外，用户无需记忆具体命令。
 
-| 用户意图 | 流程 | 说明 |
-|----------|------|------|
-| 首次创建文档库 | → [INITIALIZE.md](./references/INITIALIZE.md) | 检测 → 从模板创建骨架 → 注册到 CLAUDE.md |
-| 记录新的迭代/变更 | → [UPDATE.md](./references/UPDATE.md) | 收集输入 → 分析 → 实施 → 记录 → 更新索引 |
-| 查看项目状态 | 直接读取 `{docs_path}/_INDEX.md` → `{media_path}/OVERVIEW.md` | 无需额外流程 |
-| 查找历史决策 | 读取 `{media_path}/CHANGELOG.md` → 打开对应 `{media_path}/changes/*.md` | 按需深入 |
-| 查阅知识 | 读取 `{media_path}/KNOWLEDGE.md` → 打开对应 `{media_path}/knowledge/*.md` | 按需深入 |
-| 记录/查阅调研方案 | 读取 `{media_path}/INVESTIGATION.md` → 打开对应 `{media_path}/investigations/*.md` | 按需深入 |
+### Iteration Lifecycle（迭代生命周期）
+
+一轮完整迭代遵循以下闭环，每个环节的产出都追加到同一份 `changes/YYYY-MM-DD_xxx.md` 文件中：
+
+```
+① 推进迭代 → ② 确认执行 → ③ 实施推进 → ④ 回收效果 → ⑤ 整理分析 → ⑥ 沉淀归档 → 回到 ①
+```
+
+### Operations（操作一览）
+
+| 操作 | 触发方式 | 说明 |
+|------|----------|------|
+| **初始化文档库** | `/project-docs-manager 初始化项目文档库` | 仅首次，→ [INITIALIZE.md](./references/INITIALIZE.md)：扫描项目 → 创建文档骨架 → 注册到 CLAUDE.md |
+| **了解现状** | 「目前的进展和效果」「距离目标还有多远」「当前项目状态是什么」 | AI 读取 `_INDEX.md` → `OVERVIEW.md` → `CHANGELOG.md` 汇总 |
+| **追溯历史** | 「为什么当时这么决策」「上次那个方案效果怎么样」「之前试过哪些方案」 | AI 读取 `CHANGELOG.md` → 打开对应 `changes/*.md` 深入分析 |
+| **查阅知识** | 「之前有没有踩过类似的坑」「关于 XX 有什么已知约束」 | AI 读取 `KNOWLEDGE.md` → 打开对应 `knowledge/*.md` |
+| **查阅调研** | 「之前做过 XX 方向的调研吗」「XX 的可行性分析结论是什么」 | AI 读取 `INVESTIGATION.md` → 打开对应 `investigations/*.md` |
+| **记录调研** | 「做一下 XX 方向的调研」「分析一下 XX 的可行性」 | AI 执行探索性调研 → 写入 `investigations/*.md` → 更新 INVESTIGATION.md 索引 |
+| **推进迭代** | 「下一步可以做什么」「对比一下方案 A 和 B」 | 业务背景 -> AI 差距分析 → 提出方案 + 推荐理由 + 风险评估 → 创建本轮 `changes/YYYY-MM-DD_xxx.md`，记录方案分析。→ [UPDATE.md](./references/UPDATE.md) |
+| **确认执行** | 「好，按方案 A 执行」 | 人类审批，AI 在同一份 change 文件中记录审批决策和理由，开始实施 |
+| **纠偏调整** | 「方向不对，换方案 B」「这个先放一下，优先做 XX」 | AI 在同一份 change 文件中记录中止原因，按新方向重新进入迭代循环 |
+| **实施推进** | 「这个模块先评审一下」「继续」「进展如何」 | AI 按方案落地，模块级汇报，人类随时介入评审；实施过程追加到同一份 change 文件 |
+| **回收效果** | 「效果怎么样」「跑一下前后对比」「数据出来了吗」 | AI 收集前后对比数据，汇总效果指标，判断是否达标；效果数据追加到同一份 change 文件 |
+| **整理分析** | 「总结一下这次迭代」「有什么新发现」「哪些经验值得记录」 | AI 分析成败原因，提炼知识；结论追加到同一份 change 文件，可复用知识同步到 `KNOWLEDGE.md` |
 
 ## Document Templates
 
